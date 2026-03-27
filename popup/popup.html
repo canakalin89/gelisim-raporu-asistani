@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gelişim Raporu Asistanı</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      width: 300px;
+      background: #f8fafc;
+      color: #334155;
+    }
+
+    .header {
+      background: #1e40af;
+      color: #fff;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .header-text h1 { font-size: 14px; font-weight: 700; }
+    .header-text p  { font-size: 11px; opacity: .8; margin-top: 2px; }
+
+    /* Tabs */
+    .tabs { display: flex; background: #fff; border-bottom: 1px solid #e2e8f0; }
+    .tab {
+      flex: 1; padding: 8px 4px; font-size: 12px; font-weight: 600;
+      border: none; background: none; cursor: pointer; color: #64748b;
+      border-bottom: 2px solid transparent;
+    }
+    .tab.active { color: #1e40af; border-bottom-color: #1e40af; }
+    .tab:hover:not(.active) { background: #f8fafc; color: #334155; }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Cards */
+    .content { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+    .card {
+      background: #fff; border: 1px solid #e2e8f0;
+      border-radius: 10px; padding: 12px;
+    }
+    .card-title { font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 8px; text-transform: uppercase; letter-spacing: .5px; }
+    .status-row { display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
+    .status-row .label { color: #64748b; }
+    .status-row .value { font-weight: 600; color: #1e40af; }
+    .status-row .value.empty { color: #94a3b8; font-weight: 400; }
+    .links { display: flex; flex-direction: column; gap: 6px; }
+    a.link-btn {
+      display: block; padding: 8px 12px;
+      background: #eff6ff; border: 1px solid #93c5fd; border-radius: 8px;
+      color: #1e40af; text-decoration: none; font-size: 12px; font-weight: 600;
+      text-align: center; transition: background .15s;
+    }
+    a.link-btn:hover { background: #dbeafe; }
+    button.danger-btn {
+      width: 100%; padding: 8px; background: #fff;
+      border: 1px solid #fca5a5; border-radius: 8px;
+      color: #dc2626; font-size: 12px; font-weight: 600; cursor: pointer;
+    }
+    button.danger-btn:hover { background: #fef2f2; }
+
+    /* Help */
+    .help-section { margin-bottom: 10px; }
+    .help-section:last-child { margin-bottom: 0; }
+    .help-title {
+      font-size: 12px; font-weight: 700; color: #1e40af;
+      margin-bottom: 5px;
+    }
+    .help-steps {
+      font-size: 11px; color: #334155; line-height: 1.6;
+      padding-left: 16px;
+    }
+    .help-steps li { margin-bottom: 2px; }
+    .help-note {
+      font-size: 11px; color: #64748b; line-height: 1.5;
+      background: #f8fafc; border-radius: 6px; padding: 6px 8px;
+      margin-top: 4px;
+    }
+
+    .footer { padding: 8px 14px; text-align: center; font-size: 10px; color: #94a3b8; border-top: 1px solid #f1f5f9; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-text">
+      <h1>Gelişim Raporu Asistanı</h1>
+      <p>Giriş gerektirmez · Tamamen yerel</p>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="main">Ana Sayfa</button>
+    <button class="tab" data-tab="help">Nasıl Kullanılır?</button>
+    <button class="tab" data-tab="contact">İletişim</button>
+  </div>
+
+  <!-- ANA SAYFA -->
+  <div id="tab-main" class="tab-content active">
+    <div class="content">
+      <div class="card">
+        <div class="card-title">Önbellek</div>
+        <div class="status-row">
+          <span class="label">Yüklü not sayısı</span>
+          <span class="value" id="grade-count">—</span>
+        </div>
+        <div class="status-row" style="margin-top:4px;">
+          <span class="label">Son güncelleme</span>
+          <span class="value" id="grade-ts">—</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Hızlı Bağlantı</div>
+        <div class="links">
+          <a class="link-btn" href="https://e-okul.meb.gov.tr/OrtaOgretim/OKL/OOK07015.aspx" target="_blank">
+            Ortaöğretim Rapor Sayfası ↗
+          </a>
+          <a class="link-btn" href="https://e-okul.meb.gov.tr/IlkOgretim/OKL/IOK10016.aspx" target="_blank">
+            İlköğretim Rapor Sayfası ↗
+          </a>
+        </div>
+      </div>
+
+      <button class="danger-btn" id="btn-clear">🗑 Saklanan Notları Sil</button>
+    </div>
+  </div>
+
+  <!-- İLETİŞİM -->
+  <div id="tab-contact" class="tab-content">
+    <div class="content">
+      <div class="card">
+        <div class="help-title" style="margin-bottom:8px;">📬 Geri Bildirim &amp; Destek</div>
+        <p style="font-size:12px; color:#475569; line-height:1.6; margin-bottom:12px;">
+          Hata bildirmek, öneri iletmek veya yardım almak için aşağıdaki butona tıklayarak mail gönderebilirsiniz.
+        </p>
+        <a class="link-btn" href="mailto:supertacos89@gmail.com?subject=Gelişim Raporu Asistanı - Geri Bildirim" target="_blank">
+          ✉️ Mail Gönder
+        </a>
+        <div class="help-note" style="margin-top:10px;">
+          supertacos89@gmail.com
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NASIL KULLANILIR -->
+  <div id="tab-help" class="tab-content">
+    <div class="content">
+
+      <div class="card">
+        <div class="help-section">
+          <div class="help-title">📊 Not Tabanlı Mod</div>
+          <ol class="help-steps">
+            <li>Sayfada <b>sınıf</b> ve <b>dersi</b> seç, <b>Listele</b>'ye bas.</li>
+            <li><b>Notları Getir</b>'e tıkla — notlar otomatik çekilir.</li>
+            <li>Gerekirse listedeki notları veya atla (⊘) durumunu düzenle.</li>
+            <li><b>Not Tabanlı</b> modunu seç, <b>Başlat</b>'a bas.</li>
+          </ol>
+          <div class="help-note">Not → Seviye: 85+= 5 · 70–84= 4 · 50–69= 3 · 25–49= 2 · &lt;25= 1</div>
+        </div>
+
+        <div class="help-section">
+          <div class="help-title">✏️ Manuel Mod</div>
+          <ol class="help-steps">
+            <li><b>Manuel</b> modunu seç.</li>
+            <li>Yöntemi belirle: Rastgele / Sabit değer / Aralık.</li>
+            <li><b>Başlat</b>'a bas.</li>
+          </ol>
+        </div>
+
+        <div class="help-section">
+          <div class="help-title">🧹 Hepsini Temizle</div>
+          <ol class="help-steps">
+            <li>Butona bir kez bas — onay istenir.</li>
+            <li>3 saniye içinde tekrar bas — tüm cevaplar silinir.</li>
+          </ol>
+        </div>
+
+        <div class="help-section">
+          <div class="help-title">⚙️ Önce Temizle</div>
+          <div class="help-note">
+            <b>Butonlar:</b> "Temizle" butonlarını tıklar<br>
+            <b>Seçimi Kaldır:</b> radio butonları uncheck eder<br>
+            <b>Temizleme:</b> mevcut duruma dokunmaz
+          </div>
+        </div>
+
+        <div class="help-section" style="margin-bottom:0;">
+          <div class="help-title">⏱ Hız Ayarları</div>
+          <div class="help-note">
+            İnternet yavaşsa değerleri artır.<br>
+            Önerilen: açılış 1200ms · işlem 800ms · kayıt 1000ms
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="footer">v1.1.1 · Gelişim Raporu Asistanı</div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
