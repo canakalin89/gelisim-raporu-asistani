@@ -72,6 +72,99 @@ gelisim-raporu-asistani/
 
 ---
 
+## 📖 Kullanım Kılavuzu
+
+### Adım 1 — Kurulumu Tamamla
+
+Uzantıyı [Chrome Web Store](https://chromewebstore.google.com/detail/geli%C5%9Fim-raporu-asistan%C4%B1/ljcjidfmpfnilniagebhccolaidkpogb)'dan yükledikten sonra Chrome araç çubuğunda 🧩 simgesine tıkla, uzantıyı sabitle.
+
+---
+
+### Adım 2 — e-Okul'a Giriş Yap
+
+[e-Okul](https://e-okul.meb.gov.tr)'a normal şekilde giriş yap. Uzantı ek bir giriş gerektirmez; e-Okul oturumunu kullanır.
+
+---
+
+### 📊 Not Tabanlı Mod
+
+> Öğrencilerin notlarına göre rapor cümlelerini otomatik seçer.
+
+**1. Not sayfasını aç**
+
+- Ortaöğretim: `Okul Karnesi > Gelişim Raporu > Not Girişi`
+- Sayfada **sınıfı** ve **dersi** seç → **Listele**'ye bas
+
+**2. Notları Getir**
+
+- Gelişim raporu formunda uzantı paneli açılır
+- **"Notları Getir"** butonuna bas — uzantı arka planda not sayfasını açıp notları çeker ve kapatır
+
+**3. Kontrol Et (isteğe bağlı)**
+
+- Çekilen notları listede görebilirsin
+- Yanlış görünen bir notu manuel düzenleyebilirsin
+- Bir öğrenciyi atlamak için ⊘ simgesine bas
+
+**4. Başlat**
+
+- **"Not Tabanlı"** modunu seç → **"Başlat"**'a bas
+- Form tüm öğrenciler için otomatik dolar
+
+**Not → Seviye Dönüşümü:**
+
+| Puan | Seviye |
+|------|--------|
+| 85 ve üzeri | 5 — Çok İyi |
+| 70 – 84 | 4 — İyi |
+| 50 – 69 | 3 — Orta |
+| 25 – 49 | 2 — Geliştirilmeli |
+| 25'in altı | 1 — Yetersiz |
+
+---
+
+### ✏️ Manuel Mod
+
+> Tüm öğrencilere aynı değeri ya da belirli bir aralığı atamak için kullanılır.
+
+1. Gelişim raporu formunu aç
+2. **"Manuel"** modunu seç
+3. Yöntemi belirle:
+   - **Sabit değer** — tüm öğrencilere aynı seviye
+   - **Rastgele** — belirtilen aralıkta rastgele seviye
+   - **Aralık** — alt/üst sınır girerek dağıtım yap
+4. **"Başlat"**'a bas
+
+---
+
+### 🧹 Formu Temizleme
+
+Doldurulmuş formu sıfırlamak için:
+
+1. Panelde **"Hepsini Temizle"** butonuna bas
+2. Buton rengi değişir ve onay ister
+3. **3 saniye içinde tekrar bas** — tüm seçimler kaldırılır
+
+---
+
+### ⚙️ Hız Ayarları
+
+İnternet bağlantın yavaşsa işlemler hata verebilir. Paneldeki gecikme değerlerini artır:
+
+| Ayar | Önerilen |
+|------|----------|
+| Açılış gecikmesi | 1200 ms |
+| İşlem gecikmesi | 800 ms |
+| Kayıt gecikmesi | 1000 ms |
+
+---
+
+### 🗑 Önbelleği Temizleme
+
+Uzantı popup'ında **"Saklanan Notları Sil"** butonu önbellekteki not verisini siler. Farklı bir sınıf için yeni not çekimi yapmadan önce önbelleği temizlemek iyi bir alışkanlıktır.
+
+---
+
 ## 👤 Geliştirici
 
 **Can Akalın** — Lise İngilizce Öğretmeni  
