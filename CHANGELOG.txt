@@ -1,0 +1,17 @@
+GELİŞİM RAPORU ASİSTANI - DEĞİŞİM GÜNLÜĞÜ (CHANGELOG)
+
+v1.0.0 (İLK HALİ)
+- Temel gelişim raporu doldurma fonksiyonu.
+- Manuel işaretleme seçenekleri (Rastgele, Sabit).
+- Basit tablo tarama mantığı.
+- Standart popup arayüzü.
+
+v2.1.7 (GÜNCEL HALİ)
+- **İkon Düzeltmesi:** Mağaza tarafından reddedilen bozuk PNG ikonları SVG kaynağından yeniden oluşturuldu (16px, 48px, 128px). Tasarım; uygulamanın temasıyla uyumlu mavi gradyan arka plan üzerinde radio butonlu form ve yeşil onay rozetinden oluşuyor.
+
+v2.1.6
+- **Yeni Ünite Sistemi:** Tek tek kazanım yerine "Ünite" bazlı seçim ve toplu doldurma özelliği. E-Okul'un yeni açılır-kapanır (Collapse) panel yapısıyla tam uyum.
+- **Akıllı Not Entegrasyonu:** E-Okul'dan notları otomatik çekme, virgüllü/metinli puanları (Regex ile) hatasız saptama ve sadece notu olan öğrenciler için seçici işlem yapma (Seçici İşaretleme).
+- **Gelişmiş Temizleme:** E-Okul'un yeni "Yeşil Temizle" butonlarını (Bootstrap) satır bazlı hedefleyerek sayfadan atma riskini ortadan kaldıran güvenli temizleme sistemi.
+- **Modern UI/UX:** Tamamen yenilenmiş dikey kart tasarımı, canlı işlem durumu geri bildirimleri (⌛ Alınıyor...), profesyonel ikon ve gelişmiş Log takibi.
+- **Performans & Stabilite:** Özelleştirilebilir hız ayarları, akıllı tablo saptama ve mağaza standartlarına uygun optimize edilmiş kod yapısı.

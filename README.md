@@ -142,7 +142,7 @@ gelisim-raporu-asistani/
 - **İzinler:** `storage`, `tabs`
 - **Host İzni:** `https://e-okul.meb.gov.tr/*`
 - **Diller:** JavaScript (%87.6), HTML (%12.4)
-- **Versiyon:** 1.1.1
+- **Versiyon:** 2.1.7
 
 ### Mimari
 
@@ -189,5 +189,5 @@ Bu proje açık kaynaklıdır. Katkıda bulunmak için fork'layabilir veya pull 
 ---
 
 <p align="center">
-  <b>Gelişim Raporu Asistanı</b> · v1.1.1 · Öğretmenler için, öğretmenler tarafından ❤️
+  <b>Gelişim Raporu Asistanı</b> · v2.1.7 · Öğretmenler için, öğretmenler tarafından ❤️
 </p>
