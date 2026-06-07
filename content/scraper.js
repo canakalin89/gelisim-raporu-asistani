@@ -112,52 +112,35 @@
   const rows = [...table.querySelectorAll("tr")];
   const grades = [];
 
-  // Detect column indices based on headers
   let scoreColIndex = -1;
   let noColIndex = -1;
   let nameColIndex = -1;
 
-  const headerRows = rows.filter(r => r.querySelector("th") || r.classList.contains("header") || r.classList.contains("GridViewHeader") || r.style.fontWeight === "bold");
-  const headerRow = headerRows[headerRows.length - 1] || rows[0]; // Use last header row if multiple
-
-  if (headerRow) {
-    const cells = [...headerRow.querySelectorAll("td, th")];
-    const headerTexts = cells.map(c => (c.textContent || "").toLowerCase().trim());
-    console.log("[EKoa Scraper] Found headers:", headerTexts);
-
-    headerTexts.forEach((txt, i) => {
-      // 1. Student Number
-      if (txt.includes("no") || txt.includes("numara")) {
-        noColIndex = i;
+  // Scan every row until a cell matching the predicate is found.
+  // Colspan values are accumulated so the returned index maps directly
+  // onto data-row cell indices — this handles e-okul's two-row header
+  // where "1.Sınav" spans 4 columns (Y, D, K, Ort.) in the sub-header.
+  function findColByText(tableRows, matchFn) {
+    for (const row of tableRows) {
+      let col = 0;
+      for (const cell of row.querySelectorAll("td, th")) {
+        const txt = (cell.textContent || "").trim().toLowerCase().replace(/\s+/g, " ");
+        const span = parseInt(cell.getAttribute("colspan") || "1");
+        if (matchFn(txt)) return col;
+        col += span;
       }
-      // 2. Student Name
-      if (txt.includes("ad") || txt.includes("soyad") || txt.includes("öğrenci")) {
-        nameColIndex = i;
-      }
-      
-      // 3. Score Column (Puanı)
-      // We look for "puan", "not", "ort.", "başarı"
-      // If we find multiple, we prefer:
-      // - Match for "puanı"
-      // - Match for "puan"
-      // - The last one found (usually the average or latest exam)
-      if (txt.includes("puan") || txt.includes("not") || txt.includes("ort") || txt.includes("başarı")) {
-        const isBetterMatch = (
-          scoreColIndex === -1 || 
-          txt.includes("puanı") || 
-          txt === "puan" ||
-          (!headerTexts[scoreColIndex].includes("puanı") && headerTexts[scoreColIndex] !== "puan")
-        );
-        
-        if (isBetterMatch) {
-          scoreColIndex = i;
-        }
-      }
-    });
+    }
+    return -1;
   }
 
-  // Defaults if detection failed
-  if (noColIndex === -1) noColIndex = 0;
+  scoreColIndex = findColByText(rows, txt => txt === "puanı" || txt === "puan");
+  if (scoreColIndex === -1)
+    scoreColIndex = findColByText(rows, txt => txt.includes("puan") || txt.includes("başarı"));
+
+  noColIndex   = findColByText(rows, txt => txt === "okul no" || txt === "öğrenci no" || txt === "numara" || txt === "no");
+  nameColIndex = findColByText(rows, txt => txt === "adı soyadı" || txt === "ad soyad" || txt.includes("adı soyadı"));
+
+  if (noColIndex   === -1) noColIndex   = 0;
   if (nameColIndex === -1) nameColIndex = 1;
 
   console.log(`[EKoa Scraper] Column detection: No=${noColIndex}, Name=${nameColIndex}, Score=${scoreColIndex}`);
@@ -176,29 +159,16 @@
     // Student number validation (must be numeric and not too short/long usually)
     if (!no || isNaN(parseInt(no)) || no.length < 1) continue; 
 
+    // Puanı is always the rightmost numeric column — scan right-to-left.
     let score = null;
-    if (scoreColIndex >= 0 && cells[scoreColIndex]) {
-      const raw = cells[scoreColIndex].textContent.trim().replace(",", ".");
-      // Use regex to find the first number (integer or float) in the cell
-      // This handles cases like "85,00" or "85 (Geçti)"
-      const match = raw.match(/(\d+(\.\d+)?)/);
+    for (let i = cells.length - 1; i > nameColIndex; i--) {
+      const raw = (cells[i].textContent || "").trim().replace(",", ".");
+      const match = raw.match(/^(\d+(?:\.\d+)?)$/);
       if (match) {
-        const parsed = parseFloat(match[1]);
-        if (!isNaN(parsed)) score = Math.round(parsed);
-      }
-    }
-    
-    // Fallback: if score still null, try searching all cells after name for a valid numeric score
-    if (score === null) {
-      for (let i = nameColIndex + 1; i < cells.length; i++) {
-        const raw = cells[i].textContent.trim().replace(",", ".");
-        const match = raw.match(/(\d+(\.\d+)?)/);
-        if (match) {
-          const val = parseFloat(match[1]);
-          if (!isNaN(val) && val >= 0 && val <= 100) {
-            score = Math.round(val);
-            break;
-          }
+        const val = parseFloat(match[1]);
+        if (!isNaN(val) && val >= 0 && val <= 100) {
+          score = Math.round(val);
+          break;
         }
       }
     }

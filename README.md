@@ -29,8 +29,10 @@ Desteklenen sayfalar:
 
 | Özellik | Açıklama |
 |---|---|
-| 📊 **Not Tabanlı Mod** | E-Okul'dan öğrenci notlarını otomatik çeker; nota göre seviye atar |
+| 📊 **Not Tabanlı Mod** | E-Okul'dan öğrenci dönem puanlarını otomatik çeker; nota göre seviye atar |
 | ✏️ **Manuel Mod** | Rastgele, sabit değer veya aralık yöntemiyle formu doldurur |
+| ☑️ **Öğrenci Seçimi** | Devamsız veya muaf öğrencileri listeden çıkararak sadece seçili öğrenciler için doldurur |
+| 📂 **Ünite Seçimi** | Hangi ünitelerin doldurulacağını tek tek seçebilirsiniz |
 | 🧹 **Toplu Temizleme** | Tüm rapor cevaplarını tek tıkla siler (çift onay mekanizmalı) |
 | 🔒 **Gizlilik** | Hiçbir sunucuya veri göndermez; her şey tarayıcıda yerel olarak çalışır |
 | ⚡ **Hız Ayarları** | Açılış, işlem ve kayıt gecikmelerini özelleştirebilirsiniz |
@@ -61,11 +63,11 @@ Eklentinin kullanımını adım adım anlatan tanıtım videosunu izleyebilirsin
 
 1. E-Okul'da **sınıf** ve **ders** seçin, **"Listele"** butonuna basın.
 2. Eklenti panelinde **"Notları Getir"** butonuna tıklayın — notlar otomatik olarak çekilir.
-3. Gerekirse listede **not** veya **atla (⊘)** durumunu düzenleyin.
+3. Gerekirse işaretini kaldırarak bazı öğrencileri atlayabilirsiniz.
 4. **"Not Tabanlı"** modunu seçip **"Başlat"** butonuna basın.
 
 > **Not → Seviye dönüşüm tablosu:**
-> 
+>
 > | Puan | Seviye |
 > |------|--------|
 > | 85 ve üzeri | 5 |
@@ -73,6 +75,16 @@ Eklentinin kullanımını adım adım anlatan tanıtım videosunu izleyebilirsin
 > | 50 – 69 | 3 |
 > | 25 – 49 | 2 |
 > | 25'in altı | 1 |
+
+---
+
+### ☑️ Öğrenci Seçimi
+
+Notlar getirildikten sonra listede her öğrencinin yanında bir onay kutusu görünür. İşareti kaldırılan öğrenciler otomasyon sırasında atlanır. Devamsız, muaf veya rapor doldurulmayacak öğrenciler bu şekilde kolayca dışarıda bırakılabilir.
+
+- **Hepsini Seç** butonu ile tüm öğrenciler seçilir.
+- **Hiçbirini Seçme** butonu ile tüm seçimler kaldırılır.
+- Kaç öğrencinin seçili olduğu anlık olarak gösterilir.
 
 ---
 
@@ -141,8 +153,7 @@ gelisim-raporu-asistani/
 - **Manifest Sürümü:** V3
 - **İzinler:** `storage`, `tabs`
 - **Host İzni:** `https://e-okul.meb.gov.tr/*`
-- **Diller:** JavaScript (%87.6), HTML (%12.4)
-- **Versiyon:** 2.1.7
+- **Versiyon:** 2.1.8
 
 ### Mimari
 
@@ -189,5 +200,5 @@ Bu proje açık kaynaklıdır. Katkıda bulunmak için fork'layabilir veya pull 
 ---
 
 <p align="center">
-  <b>Gelişim Raporu Asistanı</b> · v2.1.7 · Öğretmenler için, öğretmenler tarafından ❤️
+  <b>Gelişim Raporu Asistanı</b> · v2.1.8 · Öğretmenler için, öğretmenler tarafından ❤️
 </p>

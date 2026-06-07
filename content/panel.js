@@ -1,4 +1,4 @@
-// E-Okul Rapor Asistanı — Panel (v2.1.7)
+// E-Okul Rapor Asistanı — Panel (v2.1.8)
 // Injected into report pages. Provides the floating UI + automation engine.
 
 (() => {
@@ -74,7 +74,7 @@
   const PANEL_HTML = `
     <style>${PANEL_CSS}</style>
     <div id="ekoa-root">
-      <div id="ekoa-header"><span id="ekoa-title">Gelişim Raporu Asistanı</span><span id="ekoa-version">v2.1.7</span><button class="ekoa-hbtn" id="ekoa-minimize">−</button></div>
+      <div id="ekoa-header"><span id="ekoa-title">Gelişim Raporu Asistanı</span><span id="ekoa-version">v2.1.8</span><button class="ekoa-hbtn" id="ekoa-minimize">−</button></div>
       <div id="ekoa-body">
         <div id="ekoa-tabs">
           <button class="ekoa-tab active" data-tab="fill">Doldur</button>
@@ -86,6 +86,11 @@
             <div class="ekoa-section-title">📊 Öğrenci Notları</div>
             <div class="ekoa-card">
               <div id="ekoa-grade-bar"><span id="ekoa-grade-status">Not yüklenmedi</span><button id="ekoa-btn-fetch">📥 Getir</button></div>
+              <div style="display:flex;align-items:center;gap:6px;padding:4px 10px;border-bottom:1px solid #e2e8f0;background:#f8fafc;">
+                <button id="ekoa-btn-sel-all" style="font-size:9px;background:none;border:none;color:#1e40af;cursor:pointer;font-weight:700;">Hepsini Seç</button>
+                <button id="ekoa-btn-sel-none" style="font-size:9px;background:none;border:none;color:#dc2626;cursor:pointer;font-weight:700;">Hiçbirini Seçme</button>
+                <span id="ekoa-sel-count" style="font-size:9px;color:#64748b;margin-left:auto;"></span>
+              </div>
               <div id="ekoa-grade-table-wrap"><table id="ekoa-grade-table"><tbody id="ekoa-grade-tbody"></tbody></table></div>
               <button class="ekoa-btn-ghost" id="ekoa-btn-clear-list" style="width:100%; border:none; border-top:1px solid #f1f5f9;">🗑️ Listeyi Temizle</button>
             </div>
@@ -148,14 +153,14 @@
   async function init() {
     const res = await chrome.storage.local.get([STORAGE.settings, STORAGE.grades]);
     settings = Object.assign({}, DEFAULT_SETTINGS, res[STORAGE.settings] || {});
-    grades = res[STORAGE.grades] || [];
+    grades = (res[STORAGE.grades] || []).map(g => ({ ...g, selected: true }));
     $("ekoa-set-openWait").value = settings.openWait;
     $("ekoa-set-actionWait").value = settings.actionWait;
     $("ekoa-set-saveWait").value = settings.saveWait;
     $("ekoa-fill-mode-select").value = settings.fillMode;
     $("ekoa-clear-mode").value = settings.clearMode;
     updateGradeStatus(); renderGradeTable(); renderFillUI(); bindTabs(); bindEvents(); makeDraggable(); restorePanelPosition();
-    log("Panel v2.1.7 hazır", "success");
+    log("Panel v2.1.8 hazır", "success");
   }
 
   function log(msg, level = "info") {
@@ -183,7 +188,24 @@
 
   function renderGradeTable() {
     const tbody = $("ekoa-grade-tbody");
-    tbody.innerHTML = grades.slice(0, 30).map(g => `<tr><td>${g.no}</td><td title="${g.name}">${g.name.split(' ')[0]}...</td><td><b>${g.score ?? "-"}</b></td></tr>`).join("");
+    tbody.innerHTML = grades.map((g, i) =>
+      `<tr>
+        <td style="padding:4px 6px;width:20px;"><input type="checkbox" data-i="${i}" ${g.selected !== false ? "checked" : ""}></td>
+        <td title="${g.name.replace(/"/g, '&quot;')}">${g.name.split(' ')[0]}...</td>
+        <td><b>${g.score ?? "-"}</b></td>
+      </tr>`
+    ).join("");
+    tbody.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+      cb.onchange = () => { grades[+cb.dataset.i].selected = cb.checked; updateSelCount(); };
+    });
+    updateSelCount();
+  }
+
+  function updateSelCount() {
+    const el = $("ekoa-sel-count");
+    if (!el || grades.length === 0) { if (el) el.textContent = ""; return; }
+    const n = grades.filter(g => g.selected !== false).length;
+    el.textContent = `${n}/${grades.length} seçili`;
   }
 
   function discoverUnits() {
@@ -270,6 +292,11 @@
       const student = findGradeForRow(btn, i);
       const mode = $("ekoa-fill-mode-select").value;
 
+      if (grades.length > 0 && student && student.selected === false) {
+        log(`${i+1}. öğrenci atlandı (seçili değil).`);
+        continue;
+      }
+
       if (job === "fill" && mode === "grade" && (!student || student.score === null || student.score === undefined || student.score < 0)) {
         log(`Öğrenci ${i+1} atlandı: Notu yok.`, "warn");
         continue;
@@ -355,13 +382,15 @@
         if (msg.type === "NOTIFY_PANEL") {
           chrome.runtime.onMessage.removeListener(listener);
           btn.disabled = false; btn.innerText = "📥 Getir";
-          if (msg.status === "done") { chrome.storage.local.get(STORAGE.grades, (res) => { grades = res[STORAGE.grades] || []; updateGradeStatus(); renderGradeTable(); log(`${grades.length} not yüklendi.`, "success"); }); }
+          if (msg.status === "done") { chrome.storage.local.get(STORAGE.grades, (res) => { grades = (res[STORAGE.grades] || []).map(g => ({ ...g, selected: true })); updateGradeStatus(); renderGradeTable(); log(`${grades.length} not yüklendi.`, "success"); }); }
           else { status.innerText = "Hata!"; log("Hata: " + (msg.message || "Bilinmeyen"), "error"); }
         }
       };
       chrome.runtime.onMessage.addListener(listener);
     };
     $("ekoa-btn-unit-fetch").onclick = () => { const btn = $("ekoa-btn-unit-fetch"); btn.disabled = true; btn.innerText = "⌛ Taranıyor..."; setTimeout(() => { discoverUnits(); btn.disabled = false; btn.innerText = "🔄 Üniteleri Tara"; }, 500); };
+    $("ekoa-btn-sel-all").onclick  = () => { grades.forEach(g => g.selected = true);  renderGradeTable(); };
+    $("ekoa-btn-sel-none").onclick = () => { grades.forEach(g => g.selected = false); renderGradeTable(); };
     $("ekoa-btn-unit-all").onclick = () => { units.forEach(u => u.selected = true); renderUnitList(); };
     $("ekoa-btn-unit-none").onclick = () => { units.forEach(u => u.selected = false); renderUnitList(); };
     $("ekoa-fill-mode-select").onchange = (e) => { settings.fillMode = e.target.value; renderFillUI(); };

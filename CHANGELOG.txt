@@ -1,5 +1,9 @@
 GELİŞİM RAPORU ASİSTANI - DEĞİŞİM GÜNLÜĞÜ (CHANGELOG)
 
+v2.1.8 (GÜNCEL HALİ)
+- **Hata Düzeltmesi — Yanlış Not Okuma:** "Notları Getir" özelliği dönem puanı yerine sınav tablosundaki ilk sütunun (Yazılı) değerini çekiyordu. E-Okul tablolarının iki satırlı başlık yapısı sütun indekslerini kaydırıyordu. Artık her satırda sağdan sola tarama yapılarak Puanı sütunu doğrudan ve güvenilir biçimde okunuyor.
+- **Yeni Özellik — Öğrenci Seçimi:** Not listesindeki her öğrencinin yanına onay kutusu eklendi. İşareti kaldırılan öğrenciler otomasyon sırasında atlanır. Devamsız veya muaf öğrenciler için zaman kaybetmeden çalışmaya devam edilir. Hepsini Seç / Hiçbirini Seçme butonları ve seçili öğrenci sayacı da eklendi.
+
 v1.0.0 (İLK HALİ)
 - Temel gelişim raporu doldurma fonksiyonu.
 - Manuel işaretleme seçenekleri (Rastgele, Sabit).
