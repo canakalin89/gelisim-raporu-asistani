@@ -1,4 +1,4 @@
-# 📋 Gelişim Raporu Asistanı
+# 📋 Gelişim Düzeyleri Giriş Asistanı
 
 > E-Okul gelişim raporu formlarını otomatik dolduran, not tabanlı veya manuel çalışabilen ücretsiz bir Chrome eklentisi.  
 > **Giriş gerektirmez · Tamamen yerel · Hiçbir veri dışarı gönderilmez.**
@@ -17,7 +17,7 @@
 
 ## 📌 Nedir?
 
-**Gelişim Raporu Asistanı**, Millî Eğitim Bakanlığı'nın E-Okul sistemi üzerindeki gelişim raporu formlarını hızlı ve hatasız doldurmak için tasarlanmış bir Chrome tarayıcı eklentisidir.
+**Gelişim Düzeyleri Giriş Asistanı**, Millî Eğitim Bakanlığı'nın E-Okul sistemi üzerindeki gelişim raporu formlarını hızlı ve hatasız doldurmak için tasarlanmış bir Chrome tarayıcı eklentisidir.
 
 Desteklenen sayfalar:
 - **Ortaöğretim** → `e-okul.meb.gov.tr/OrtaOgretim/OKL/OOK07015.aspx`
@@ -44,7 +44,7 @@ Desteklenen sayfalar:
 
 Eklentinin kullanımını adım adım anlatan tanıtım videosunu izleyebilirsiniz:
 
-[![Gelişim Raporu Asistanı Tanıtım Videosu](https://img.youtube.com/vi/XK_5AS_5VDw/maxresdefault.jpg)](https://www.youtube.com/watch?v=XK_5AS_5VDw)
+[![Gelişim Düzeyleri Giriş Asistanı Tanıtım Videosu](https://img.youtube.com/vi/XK_5AS_5VDw/maxresdefault.jpg)](https://www.youtube.com/watch?v=XK_5AS_5VDw)
 
 ---
 
@@ -153,7 +153,7 @@ gelisim-raporu-asistani/
 - **Manifest Sürümü:** V3
 - **İzinler:** `storage`, `tabs`
 - **Host İzni:** `https://e-okul.meb.gov.tr/*`
-- **Versiyon:** 2.1.8
+- **Versiyon:** 2.1.9
 
 ### Mimari
 
@@ -200,5 +200,5 @@ Bu proje açık kaynaklıdır. Katkıda bulunmak için fork'layabilir veya pull 
 ---
 
 <p align="center">
-  <b>Gelişim Raporu Asistanı</b> · v2.1.8 · Öğretmenler için, öğretmenler tarafından ❤️
+  <b>Gelişim Düzeyleri Giriş Asistanı</b> · v2.1.9 · Öğretmenler için, öğretmenler tarafından ❤️
 </p>

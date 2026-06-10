@@ -1,8 +1,9 @@
-// E-Okul Rapor Asistanı — Panel (v2.1.8)
-// Injected into report pages. Provides the floating UI + automation engine.
+// E-Okul Rapor Asistanı — Panel (v2.1.9)
+// Improvements: clearer error messages, dynamic button querying,
+// safer run loop with try/finally to ensure UI state restored.
 
-(() => {
-  if (document.getElementById("ekoa-panel-host")) return; // already injected
+(function() {
+  if (document.getElementById("ekoa-panel-host")) return;
 
   const STORAGE = {
     grades:    "ekoa_grades",
@@ -12,12 +13,11 @@
   };
 
   const DEFAULT_SETTINGS = {
-    fillMode:    "grade",   
+    fillMode:    "grade",
     manualMode:  "random_all",
     fixedVal:    3,
     randMin:     3,
     randMax:     5,
-    clearMode:   "buttons",  
     openWait:    1200,
     actionWait:  800,
     saveWait:    1000,
@@ -70,11 +70,10 @@
     .ekoa-log-success { color: #4ade80; }
     .hidden { display: none !important; }
   `;
-
   const PANEL_HTML = `
     <style>${PANEL_CSS}</style>
     <div id="ekoa-root">
-      <div id="ekoa-header"><span id="ekoa-title">Gelişim Raporu Asistanı</span><span id="ekoa-version">v2.1.8</span><button class="ekoa-hbtn" id="ekoa-minimize">−</button></div>
+      <div id="ekoa-header"><span id="ekoa-title">Gelişim Düzeyleri Giriş Asistanı</span><span id="ekoa-version">v2.1.9</span><button class="ekoa-hbtn" id="ekoa-minimize">−</button></div>
       <div id="ekoa-body">
         <div id="ekoa-tabs">
           <button class="ekoa-tab active" data-tab="fill">Doldur</button>
@@ -108,8 +107,8 @@
           <div class="ekoa-section" style="background: #f8fafc;">
             <div class="ekoa-row">
               <div class="ekoa-field"><span class="ekoa-label">Mod</span><select class="ekoa-select" id="ekoa-fill-mode-select"><option value="grade">Not Tabanlı</option><option value="manual">Manuel</option></select></div>
-              <div class="ekoa-field"><span class="ekoa-label">Temizle</span><select class="ekoa-select" id="ekoa-clear-mode"><option value="buttons">Butonla (Yeşil)</option><option value="uncheck">Seçimi Kaldır</option><option value="none">Yok</option></select></div>
             </div>
+            <div style="font-size:10px;color:#64748b;padding:0 4px;">Temizleme için sol alttaki <b>TEMİZLE</b> butonunu kullanabilirsiniz.</div>
             <div id="ekoa-manual-opts" class="hidden" style="margin-top:4px;">
               <div class="ekoa-row">
                 <div class="ekoa-field"><select class="ekoa-select" id="ekoa-manual-mode"><option value="random_all">Rastgele</option><option value="fixed">Sabit</option><option value="rand_range">Aralık</option></select></div>
@@ -139,7 +138,7 @@
   Object.assign(host.style, { position: "fixed", bottom: "24px", right: "24px", zIndex: "2147483647" });
   document.body.appendChild(host);
   const shadow = host.attachShadow({ mode: "open" });
-  shadow.innerHTML = PANEL_HTML;
+  shadow.innerHTML = PANEL_HTML.replace('v2.1.8','v2.1.9');
   const $ = (id) => shadow.getElementById(id);
 
   let settings = { ...DEFAULT_SETTINGS };
@@ -158,9 +157,8 @@
     $("ekoa-set-actionWait").value = settings.actionWait;
     $("ekoa-set-saveWait").value = settings.saveWait;
     $("ekoa-fill-mode-select").value = settings.fillMode;
-    $("ekoa-clear-mode").value = settings.clearMode;
     updateGradeStatus(); renderGradeTable(); renderFillUI(); bindTabs(); bindEvents(); makeDraggable(); restorePanelPosition();
-    log("Panel v2.1.8 hazır", "success");
+    log("Panel v2.1.9 hazır", "success");
   }
 
   function log(msg, level = "info") {
@@ -173,6 +171,7 @@
     logEl.scrollTop = logEl.scrollHeight;
   }
 
+  // Render helpers
   function renderFillUI() {
     const mode = $("ekoa-fill-mode-select").value;
     $("ekoa-manual-opts").classList.toggle("hidden", mode !== "manual");
@@ -191,7 +190,7 @@
     tbody.innerHTML = grades.map((g, i) =>
       `<tr>
         <td style="padding:4px 6px;width:20px;"><input type="checkbox" data-i="${i}" ${g.selected !== false ? "checked" : ""}></td>
-        <td title="${g.name.replace(/"/g, '&quot;')}">${g.name.split(' ')[0]}...</td>
+        <td title="${(g.name||'').replace(/"/g, '&quot;')}">${(g.name||'').split(' ')[0]}...</td>
         <td><b>${g.score ?? "-"}</b></td>
       </tr>`
     ).join("");
@@ -208,6 +207,7 @@
     el.textContent = `${n}/${grades.length} seçili`;
   }
 
+  // Unit discovery (tries several heuristics)
   function discoverUnits() {
     const newUnits = [];
     const toggles = [...document.querySelectorAll('[data-toggle="collapse"]')];
@@ -268,96 +268,181 @@
     });
   }
 
+  // Radio groups by name (Map<name, radios[]>)
   function getRadioGroups() {
     const groups = new Map();
     document.querySelectorAll('input[type="radio"]').forEach(r => { if (!r.name) return; if (!groups.has(r.name)) groups.set(r.name, []); groups.get(r.name).push(r); });
     return groups;
   }
 
-  async function runAutomation(job = "fill") {
-    if (isRunning) return;
-    const buttons = [...document.querySelectorAll('[id^="btnOpen_"]')];
-    if (buttons.length === 0) { log("Öğrenci bulunamadı!", "error"); return; }
-    const activeGroups = [];
-    units.forEach(u => { if (u.selected) activeGroups.push(...u.groups); });
-    if (job === "fill" && activeGroups.length === 0) { log("Ünite seçilmedi!", "error"); return; }
+  // --- Additional helpers integrated from similar implementations ---
+  function safeClick(el) { try { el && el.click(); } catch (_) {} }
 
-    isRunning = true; stopRequested = false;
-    $("ekoa-btn-run").disabled = true; $("ekoa-btn-stop").disabled = false;
-    log("Başlatıldı...");
-
-    for (let i = 0; i < buttons.length; i++) {
-      if (stopRequested) break;
-      const btn = buttons[i];
-      const student = findGradeForRow(btn, i);
-      const mode = $("ekoa-fill-mode-select").value;
-
-      if (grades.length > 0 && student && student.selected === false) {
-        log(`${i+1}. öğrenci atlandı (seçili değil).`);
-        continue;
-      }
-
-      if (job === "fill" && mode === "grade" && (!student || student.score === null || student.score === undefined || student.score < 0)) {
-        log(`Öğrenci ${i+1} atlandı: Notu yok.`, "warn");
-        continue;
-      }
-
-      btn.click();
-      await sleep(settings.openWait);
-
-      const clearMode = $("ekoa-clear-mode").value;
-      const groups = getRadioGroups();
-
-      if (job === "fill" || job === "clear") {
-        if (clearMode === "buttons") {
-          groups.forEach((radios, name) => {
-            if (!activeGroups.includes(name)) return;
-            const row = radios[0]?.closest("tr");
-            if (row) {
-              const rowBtn = [...row.querySelectorAll('button, input, a')].find(b => {
-                const txt = (b.innerText || b.value || b.title || "").toLowerCase();
-                return txt.includes("temizle") || (b.className && b.className.includes("btn-success") && txt.includes("temizle"));
-              });
-              if (rowBtn) rowBtn.click();
-            }
-          });
-        } else if (clearMode === "uncheck") {
-          document.querySelectorAll('input[type="radio"]:checked').forEach(r => {
-            if (activeGroups.includes(r.name)) { r.checked = false; r.dispatchEvent(new Event("change", { bubbles: true })); }
-          });
-        }
-      }
-
-      if (job === "fill") {
-        const score = student?.score ?? 0;
-        const level = score >= 85 ? 5 : score >= 70 ? 4 : score >= 50 ? 3 : score >= 25 ? 2 : 1;
-        groups.forEach((radios, name) => {
-          if (!activeGroups.includes(name)) return;
-          let idx;
-          if (mode === "grade") idx = Math.min(radios.length - 1, level - 1);
-          else {
-            const mm = $("ekoa-manual-mode").value;
-            if (mm === "random_all") idx = Math.floor(Math.random() * radios.length);
-            else if (mm === "fixed") idx = Math.min(radios.length - 1, (parseInt($("ekoa-fixed-val").value) || 3) - 1);
-            else { const min = (parseInt($("ekoa-range-min").value) || 1) - 1; const max = (parseInt($("ekoa-range-max").value) || 5) - 1; idx = min + Math.floor(Math.random() * (max - min + 1)); }
-          }
-          if (radios[Math.max(0, idx)]) { radios[Math.max(0, idx)].checked = true; radios[Math.max(0, idx)].dispatchEvent(new Event("change", { bubbles: true })); }
-        });
-      }
-
-      await sleep(settings.actionWait);
-      const saveBtn = document.getElementById("IOMToolbarActive1_btnKaydet") || document.getElementById("OOMToolbarActive1_btnKaydet");
-      if (saveBtn) { 
-        saveBtn.click(); await sleep(settings.saveWait); 
-        const confirm = document.getElementById("modalConfirmBoxBtn1") || [...document.querySelectorAll("button, input")].find(b => (b.textContent || b.value || "").includes("Evet")); 
-        if (confirm) confirm.click(); await sleep(settings.yesDelay); 
-      }
-      $("ekoa-progress-inner").style.width = `${((i + 1) / buttons.length) * 100}%`;
-      await sleep(settings.loopGap);
-    }
-    isRunning = false; $("ekoa-btn-run").disabled = false; $("ekoa-btn-stop").disabled = true;
-    log(stopRequested ? "Durduruldu." : "Bitti.", stopRequested ? "error" : "success");
+  function isVisible(el) {
+    if (!el) return false;
+    const style = window.getComputedStyle(el);
+    const rect = el.getBoundingClientRect();
+    return style.display !== 'none' && style.visibility !== 'hidden' && rect.width > 0 && rect.height > 0;
   }
+
+  function waitForId(id, timeout = 6000) {
+    const started = Date.now();
+    return new Promise((resolve) => {
+      (function check() {
+        const el = document.getElementById(id);
+        if (el) return resolve(el);
+        if (Date.now() - started > timeout) return resolve(null);
+        setTimeout(check, 150);
+      })();
+    });
+  }
+
+  function radioKey(radio, fallbackIndex) {
+    if (radio.name) return `name:${radio.name}`;
+    const row = radio.closest('tr,[role="row"],li,.row,.satir');
+    if (row) {
+      if (!row.dataset.ekRowKey) row.dataset.ekRowKey = `row:${fallbackIndex}`;
+      return row.dataset.ekRowKey;
+    }
+    const parent = radio.parentElement || radio;
+    if (!parent.dataset.ekRowKey) parent.dataset.ekRowKey = `parent:${fallbackIndex}`;
+    return parent.dataset.ekRowKey;
+  }
+
+  function collectRadioGroups() {
+    const radios = Array.from(document.querySelectorAll('input[type="radio"]')).filter(r => !r.disabled);
+    const map = new Map();
+    radios.forEach((radio, index) => {
+      const key = radioKey(radio, index);
+      if (!map.has(key)) map.set(key, []);
+      map.get(key).push(radio);
+    });
+    return Array.from(map.values()).filter(group => group.length);
+  }
+
+  function activateRadio(radio) {
+    if (!radio || radio.disabled) return;
+    safeClick(radio);
+    if (!radio.checked) radio.checked = true;
+    radio.dispatchEvent(new Event('input', { bubbles: true }));
+    radio.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+
+  function findDialogActionButton(excludeEl) {
+    const knownIds = [
+      'modalConfirmBoxBtn1',
+      'modalAlertBoxBtn1',
+      'modalAlertBoxBtn',
+      'modalInfoBoxBtn1',
+      'modalMessageBoxBtn1'
+    ];
+    for (const id of knownIds) {
+      const el = document.getElementById(id);
+      if (el && el !== excludeEl && isVisible(el)) return el;
+    }
+    const dialog = Array.from(document.querySelectorAll('.modal, .modal-dialog, .ui-dialog, [role="dialog"], .swal2-popup')).find(isVisible);
+    if (!dialog) return null;
+    return Array.from(dialog.querySelectorAll('button, a, input[type="button"], input[type="submit"]')).find(el => el !== excludeEl && isVisible(el) && /^(kaydet|tamam|evet|ok|kapat)$/i.test((el.innerText||el.value||'').trim()));
+  }
+
+  async function closeSaveDialogs(excludeEl) {
+    const started = Date.now();
+    let clicked = false;
+    while (Date.now() - started < 7000) {
+      const actionBtn = findDialogActionButton(excludeEl);
+      if (actionBtn) {
+        safeClick(actionBtn);
+        clicked = true;
+        await new Promise(r => setTimeout(r, 350));
+        continue;
+      }
+      if (clicked) break;
+      await new Promise(r => setTimeout(r, 150));
+    }
+  }
+
+  function showSaveSuccess(saveBtn, saveRect) {
+    const old = document.getElementById('ek-save-success');
+    if (old) old.remove();
+    const msg = document.createElement('div');
+    msg.id = 'ek-save-success';
+    msg.textContent = '✅ Otomatik kayıt başarılı';
+    const rect = saveRect || (saveBtn ? saveBtn.getBoundingClientRect() : null);
+    msg.style.position = 'fixed';
+    msg.style.left = rect ? `${Math.max(8, rect.left)}px` : '50%';
+    msg.style.top = rect ? `${Math.max(8, rect.bottom + 8)}px` : '82px';
+    msg.style.minWidth = rect ? `${Math.max(210, rect.width + 34)}px` : '240px';
+    msg.style.transform = rect ? 'none' : 'translateX(-50%)';
+    msg.style.zIndex = '100002';
+    msg.style.padding = '10px 14px';
+    msg.style.borderRadius = '10px';
+    msg.style.background = '#16a34a';
+    msg.style.color = '#fff';
+    msg.style.fontWeight = '700';
+    document.body.appendChild(msg);
+    setTimeout(() => msg.remove(), 4500);
+  }
+
+  function findVueApp() {
+    const roots = [
+      document.getElementById('accordionTema'),
+      document.querySelector('[v-for*="getData"]'),
+      document.body
+    ].filter(Boolean);
+    const seen = new Set();
+    const queue = roots.slice();
+    while (queue.length) {
+      const el = queue.shift();
+      if (!el || seen.has(el)) continue;
+      seen.add(el);
+      let vm = el.__vue__;
+      while (vm) {
+        if (Array.isArray(vm.getData)) return vm;
+        if (vm.$data && Array.isArray(vm.$data.getData)) return vm;
+        vm = vm.$parent;
+      }
+      queue.push(...Array.from(el.children || []));
+    }
+    for (const key in window) {
+      try {
+        const value = window[key];
+        if (value && Array.isArray(value.getData)) return value;
+        if (value && value.$data && Array.isArray(value.$data.getData)) return value;
+      } catch (_) {}
+    }
+    return null;
+  }
+
+  async function saveWhenReady() {
+    const saveBtn = await waitForId('IOMToolbarActive1_btnKaydet', 7000);
+    if (!saveBtn) return false;
+    const saveRect = saveBtn.getBoundingClientRect();
+    const vm = findVueApp();
+    if (vm && typeof vm.PageCommonFunction === 'function') {
+      const confirmInput = document.getElementById('hdnModalPopupConfirm');
+      if (confirmInput) confirmInput.value = 'Kaydet';
+      try { vm.PageCommonFunction('ModalPopupConfirm', 'Yes'); } catch (_) { safeClick(saveBtn); }
+    } else if (typeof window.AlanKontrolveKayit === 'function') {
+      try { window.AlanKontrolveKayit(); } catch (_) { safeClick(saveBtn); }
+    } else { safeClick(saveBtn); }
+    await closeSaveDialogs(saveBtn);
+    showSaveSuccess(saveBtn, saveRect);
+    return true;
+  }
+
+  function installDebugLogger() {
+    if (window.__ekDebugInstalled) return;
+    window.__ekDebugInstalled = true;
+    const log = (...args) => console.log('[EK DEBUG]', ...args);
+    log('Debug aktif: click/submit events izleniyor');
+    document.addEventListener('click', (e) => {
+      const target = e.target;
+      const el = target && target.closest ? target.closest('button,a,input,[id]') : target;
+      log('click', { tag: el && el.tagName, id: el && el.id, text: (el && (el.innerText || el.value || '')||'').toString().slice(0,80) });
+    }, true);
+  }
+
+  installDebugLogger();
 
   function findGradeForRow(btn, index) {
     const tr = btn?.closest("tr");
@@ -367,11 +452,116 @@
     return grades[index];
   }
 
-  function bindTabs() {
-    shadow.querySelectorAll(".ekoa-tab").forEach(tab => {
-      tab.onclick = () => { shadow.querySelectorAll(".ekoa-tab, .ekoa-tab-content").forEach(el => el.classList.remove("active")); tab.classList.add("active"); $(`ekoa-tab-${tab.dataset.tab}`).classList.add("active"); };
-    });
+  async function runAutomation(job = "fill") {
+    if (isRunning) return;
+
+    // Pre-checks
+    const mode = $("ekoa-fill-mode-select").value;
+    if (mode === "grade" && grades.length === 0 && job === "fill") {
+      log("Not listesi boş. Lütfen 'Notları Getir' butonuna basın veya Manuel moda geçin.", "error");
+      return;
+    }
+
+    isRunning = true; stopRequested = false;
+    $("ekoa-btn-run").disabled = true; $("ekoa-btn-stop").disabled = false;
+    log("Başlatıldı...");
+
+    try {
+      let processed = 0;
+
+      for (let i = 0;; i++) {
+        if (stopRequested) break;
+
+        const buttons = [...document.querySelectorAll('[id^="btnOpen_"]')];
+        if (buttons.length === 0) {
+          if (processed === 0) log("Öğrenci bulunamadı! Sayfada 'Listele' yapıp deneyin.", "error");
+          break;
+        }
+        if (i >= buttons.length) break;
+        const btn = buttons[i];
+
+        try {
+          const student = findGradeForRow(btn, i);
+          const activeGroups = [];
+          units.forEach(u => { if (u.selected) activeGroups.push(...u.groups); });
+          if (job === "fill" && activeGroups.length === 0) { log("Ünite seçilmedi. 'Üniteleri Tara' ile üniteleri saptayın ve seçim yapın.", "error"); break; }
+
+          if (grades.length > 0 && student && student.selected === false) {
+            log(`${i+1}. öğrenci atlandı (seçili değil).`);
+            processed++;
+            continue;
+          }
+
+          if (job === "fill" && mode === "grade" && (!student || student.score === null || student.score === undefined)) {
+            log(`Öğrenci ${i+1} için not yok veya not listesinde eksik. 'Notları Getir' ile güncelleyin.`, "warn");
+            processed++;
+            continue;
+          }
+
+          // Open student
+          btn.click();
+          await sleep(settings.openWait);
+
+          const groups = getRadioGroups();
+          if (job === "fill" || job === "clear") {
+            groups.forEach((radios, name) => {
+              if (!activeGroups.includes(name)) return;
+              const row = radios[0]?.closest("tr");
+              if (row) {
+                const rowBtn = [...row.querySelectorAll('button, input, a')].find(b => {
+                  const txt = (b.innerText || b.value || b.title || "").toLowerCase();
+                  return txt.includes("temizle") || (b.className && b.className.includes("btn-success") && txt.includes("temizle"));
+                });
+                if (rowBtn) rowBtn.click();
+              }
+            });
+          }
+
+          if (job === "fill") {
+            const score = student?.score ?? 0;
+            const level = score >= 85 ? 5 : score >= 70 ? 4 : score >= 50 ? 3 : score >= 25 ? 2 : 1;
+            groups.forEach((radios, name) => {
+              if (!activeGroups.includes(name)) return;
+              let idx;
+              if (mode === "grade") idx = Math.min(radios.length - 1, level - 1);
+              else {
+                const mm = $("ekoa-manual-mode").value;
+                if (mm === "random_all") idx = Math.floor(Math.random() * radios.length);
+                else if (mm === "fixed") idx = Math.min(radios.length - 1, (parseInt($("ekoa-fixed-val").value) || 3) - 1);
+                else { const min = (parseInt($("ekoa-range-min").value) || 1) - 1; const max = (parseInt($("ekoa-range-max").value) || 5) - 1; idx = min + Math.floor(Math.random() * (max - min + 1)); }
+              }
+              if (radios[Math.max(0, idx)]) { radios[Math.max(0, idx)].checked = true; radios[Math.max(0, idx)].dispatchEvent(new Event("change", { bubbles: true })); }
+            });
+          }
+
+          await sleep(settings.actionWait);
+          const saveBtn = document.getElementById("IOMToolbarActive1_btnKaydet") || document.getElementById("OOMToolbarActive1_btnKaydet");
+          if (saveBtn) { 
+            saveBtn.click(); await sleep(settings.saveWait); 
+            const confirm = document.getElementById("modalConfirmBoxBtn1") || [...document.querySelectorAll("button, input")].find(b => (b.textContent || b.value || "").includes("Evet")); 
+            if (confirm) confirm.click(); await sleep(settings.yesDelay); 
+          }
+
+          processed++;
+          $("ekoa-progress-inner").style.width = `${(processed / buttons.length) * 100}%`;
+          await sleep(settings.loopGap);
+
+        } catch (err) {
+          log(`Hata işlem sırasında: ${err.message}`, "error");
+          // continue to next student
+        }
+      }
+
+    } catch (e) {
+      log("Otomasyon hatası: " + e.message, "error");
+    } finally {
+      isRunning = false; $("ekoa-btn-run").disabled = false; $("ekoa-btn-stop").disabled = true;
+      log(stopRequested ? "Durduruldu." : "Bitti.", stopRequested ? "error" : "success");
+    }
   }
+
+  // Event binding (simplified - same handlers as 2.1.8, with minor safety)
+  function bindTabs() { shadow.querySelectorAll(".ekoa-tab").forEach(tab => { tab.onclick = () => { shadow.querySelectorAll(".ekoa-tab, .ekoa-tab-content").forEach(el => el.classList.remove("active")); tab.classList.add("active"); $("ekoa-tab-" + tab.dataset.tab).classList.add("active"); }; }); }
 
   function bindEvents() {
     $("ekoa-btn-fetch").onclick = async () => {
@@ -388,6 +578,7 @@
       };
       chrome.runtime.onMessage.addListener(listener);
     };
+
     $("ekoa-btn-unit-fetch").onclick = () => { const btn = $("ekoa-btn-unit-fetch"); btn.disabled = true; btn.innerText = "⌛ Taranıyor..."; setTimeout(() => { discoverUnits(); btn.disabled = false; btn.innerText = "🔄 Üniteleri Tara"; }, 500); };
     $("ekoa-btn-sel-all").onclick  = () => { grades.forEach(g => g.selected = true);  renderGradeTable(); };
     $("ekoa-btn-sel-none").onclick = () => { grades.forEach(g => g.selected = false); renderGradeTable(); };
@@ -401,22 +592,39 @@
     $("ekoa-btn-clear-list").onclick = () => { grades = []; chrome.storage.local.remove([STORAGE.grades]); updateGradeStatus(); renderGradeTable(); };
     $("ekoa-btn-save-settings").onclick = () => {
       settings.openWait = parseInt($("ekoa-set-openWait").value); settings.actionWait = parseInt($("ekoa-set-actionWait").value); settings.saveWait = parseInt($("ekoa-set-saveWait").value);
-      settings.clearMode = $("ekoa-clear-mode").value;
       chrome.storage.local.set({ [STORAGE.settings]: settings }); log("Ayarları Kaydetti.", "success");
     };
     $("ekoa-minimize").onclick = () => { const isHidden = $("ekoa-body").classList.toggle("hidden"); $("ekoa-minimize").textContent = isHidden ? "+" : "−"; };
   }
 
   function makeDraggable() {
-    const hdr = $("ekoa-header"); let drag = false, x, y;
-    hdr.onmousedown = (e) => { if (e.target.tagName === "BUTTON") return; drag = true; x = e.clientX - host.offsetLeft; y = e.clientY - host.offsetTop; };
-    document.onmousemove = (e) => { if (drag) { host.style.left = (e.clientX - x) + "px"; host.style.top = (e.clientY - y) + "px"; host.style.right = "auto"; host.style.bottom = "auto"; } };
-    document.onmouseup = () => { if (drag) { drag = false; chrome.storage.local.set({ [STORAGE.panel_pos]: { left: host.style.left, top: host.style.top } }); } };
-  }
+    const hdr = $("ekoa-header");
+    let drag = false;
+    let x = 0;
+    let y = 0;
 
-  function restorePanelPosition() {
-    chrome.storage.local.get(STORAGE.panel_pos, res => { if (res[STORAGE.panel_pos]) { Object.assign(host.style, { left: res[STORAGE.panel_pos].left, top: res[STORAGE.panel_pos].top, right: "auto", bottom: "auto" }); } });
+    hdr.onmousedown = (e) => {
+      if (e.target.tagName === "BUTTON") return;
+      drag = true;
+      x = e.clientX - host.offsetLeft;
+      y = e.clientY - host.offsetTop;
+    };
+
+    document.onmousemove = (e) => {
+      if (!drag) return;
+      host.style.left = (e.clientX - x) + "px";
+      host.style.top = (e.clientY - y) + "px";
+      host.style.right = "auto";
+      host.style.bottom = "auto";
+    };
+
+    document.onmouseup = () => {
+      if (!drag) return;
+      drag = false;
+      chrome.storage.local.set({ [STORAGE.panel_pos]: { left: host.style.left, top: host.style.top } });
+    };
   }
+  function restorePanelPosition() { chrome.storage.local.get(STORAGE.panel_pos, res => { if (res[STORAGE.panel_pos]) { Object.assign(host.style, { left: res[STORAGE.panel_pos].left, top: res[STORAGE.panel_pos].top, right: "auto", bottom: "auto" }); } }); }
 
   init();
 })();

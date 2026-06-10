@@ -6,7 +6,7 @@
          "48": "icons/icon48.png"
       },
       "default_popup": "popup/popup.html",
-      "default_title": "Gelişim Raporu Asistanı"
+      "default_title": "Gelişim Düzeyleri Giriş Asistanı"
    },
    "background": {
       "service_worker": "background.js"
@@ -20,7 +20,7 @@
       "matches": [ "https://e-okul.meb.gov.tr/OrtaOgretim/OKL/OOK07003.aspx*", "https://e-okul.meb.gov.tr/IlkOgretim/OKL/IOK10007.aspx*" ],
       "run_at": "document_idle"
    } ],
-   "description": "Gelişim raporu formlarını not tabanlı veya manuel olarak doldurur ve temizler. Giriş gerektirmez.",
+   "description": "Gelişim düzeyleri formlarını not tabanlı veya manuel olarak doldurur ve temizler. Giriş gerektirmez.",
    "host_permissions": [ "https://e-okul.meb.gov.tr/*" ],
    "icons": {
       "128": "icons/icon128.png",
@@ -28,7 +28,7 @@
       "48": "icons/icon48.png"
    },
    "manifest_version": 3,
-   "name": "Gelişim Raporu Asistanı",
+   "name": "Gelişim Düzeyleri Giriş Asistanı",
    "permissions": [ "storage", "tabs" ],
-   "version": "2.1.8"
+   "version": "2.1.9"
 }

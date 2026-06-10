@@ -1,6 +1,13 @@
-GELİŞİM RAPORU ASİSTANI - DEĞİŞİM GÜNLÜĞÜ (CHANGELOG)
+GELİŞİM DÜZEYLERİ GİRİŞ ASİSTANI - DEĞİŞİM GÜNLÜĞÜ (CHANGELOG)
 
-v2.1.8 (GÜNCEL HALİ)
+v2.1.9 (GÜNCEL HALİ)
+- **İsim Değişikliği:** Eklenti adı "Gelişim Raporu Asistanı"ndan "Gelişim Düzeyleri Giriş Asistanı" olarak güncellendi.
+- **"Önce Temizle" Kaldırıldı:** Mod seçim dropdown'u kaldırıldı; temizleme işlemi tek buton üzerinden yönetiliyor.
+- **Gelişmiş Kayıt Motoru:** e-Okul'un Vue.js altyapısıyla entegrasyon sağlandı. Kayıt diyalogları otomatik kapatılıyor, kayıt sonrası ekranda yeşil bildirim gösteriliyor.
+- **Daha Güvenilir Otomasyon:** Her döngüde butonlar yeniden sorgulanıyor; sayfa güncellense bile liste kaybolmuyor. try/finally ile otomasyon herhangi bir hata durumunda bile düzgün sonlanıyor.
+- **Daha Açıklayıcı Hata Mesajları:** Not listesi boşsa başlamadan uyarı veriliyor; hangi öğrencide hata oluştuğu log'a yazılıyor.
+
+v2.1.8
 - **Hata Düzeltmesi — Yanlış Not Okuma:** "Notları Getir" özelliği dönem puanı yerine sınav tablosundaki ilk sütunun (Yazılı) değerini çekiyordu. E-Okul tablolarının iki satırlı başlık yapısı sütun indekslerini kaydırıyordu. Artık her satırda sağdan sola tarama yapılarak Puanı sütunu doğrudan ve güvenilir biçimde okunuyor.
 - **Yeni Özellik — Öğrenci Seçimi:** Not listesindeki her öğrencinin yanına onay kutusu eklendi. İşareti kaldırılan öğrenciler otomasyon sırasında atlanır. Devamsız veya muaf öğrenciler için zaman kaybetmeden çalışmaya devam edilir. Hepsini Seç / Hiçbirini Seçme butonları ve seçili öğrenci sayacı da eklendi.
 
