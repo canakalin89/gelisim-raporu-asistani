@@ -1,6 +1,10 @@
 GELİŞİM DÜZEYLERİ GİRİŞ ASİSTANI - DEĞİŞİM GÜNLÜĞÜ (CHANGELOG)
 
-v2.1.9 (GÜNCEL HALİ)
+v2.2.0 (GÜNCEL HALİ)
+- **İlköğretim Uyumluluğu:** "Notları Getir" artık İlköğretim sayfalarında da çalışıyor. Scraper belirli element ID'leri yerine sayfadaki tüm dropdown'ları otomatik algılıyor; e-Okul'un farklı sayfa yapılarına otomatik uyum sağlıyor.
+- **Daha Açıklayıcı Hata Mesajları:** Her hata mesajı artık ne olduğunu, neden olduğunu ve ne yapılması gerektiğini açıkça belirtiyor. Hangi öğrencide sorun yaşandığı log'da ismiyle gösteriliyor.
+
+v2.1.9
 - **İsim Değişikliği:** Eklenti adı "Gelişim Raporu Asistanı"ndan "Gelişim Düzeyleri Giriş Asistanı" olarak güncellendi.
 - **"Önce Temizle" Kaldırıldı:** Mod seçim dropdown'u kaldırıldı; temizleme işlemi tek buton üzerinden yönetiliyor.
 - **Gelişmiş Kayıt Motoru:** e-Okul'un Vue.js altyapısıyla entegrasyon sağlandı. Kayıt diyalogları otomatik kapatılıyor, kayıt sonrası ekranda yeşil bildirim gösteriliyor.

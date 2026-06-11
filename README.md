@@ -153,7 +153,7 @@ gelisim-raporu-asistani/
 - **Manifest Sürümü:** V3
 - **İzinler:** `storage`, `tabs`
 - **Host İzni:** `https://e-okul.meb.gov.tr/*`
-- **Versiyon:** 2.1.9
+- **Versiyon:** 2.2.0
 
 ### Mimari
 
@@ -200,5 +200,5 @@ Bu proje açık kaynaklıdır. Katkıda bulunmak için fork'layabilir veya pull 
 ---
 
 <p align="center">
-  <b>Gelişim Düzeyleri Giriş Asistanı</b> · v2.1.9 · Öğretmenler için, öğretmenler tarafından ❤️
+  <b>Gelişim Düzeyleri Giriş Asistanı</b> · v2.2.0 · Öğretmenler için, öğretmenler tarafından ❤️
 </p>

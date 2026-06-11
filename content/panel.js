@@ -1,4 +1,4 @@
-// E-Okul Rapor Asistanı — Panel (v2.1.9)
+// E-Okul Rapor Asistanı — Panel (v2.2.0)
 // Improvements: clearer error messages, dynamic button querying,
 // safer run loop with try/finally to ensure UI state restored.
 
@@ -73,7 +73,7 @@
   const PANEL_HTML = `
     <style>${PANEL_CSS}</style>
     <div id="ekoa-root">
-      <div id="ekoa-header"><span id="ekoa-title">Gelişim Düzeyleri Giriş Asistanı</span><span id="ekoa-version">v2.1.9</span><button class="ekoa-hbtn" id="ekoa-minimize">−</button></div>
+      <div id="ekoa-header"><span id="ekoa-title">Gelişim Düzeyleri Giriş Asistanı</span><span id="ekoa-version">v2.2.0</span><button class="ekoa-hbtn" id="ekoa-minimize">−</button></div>
       <div id="ekoa-body">
         <div id="ekoa-tabs">
           <button class="ekoa-tab active" data-tab="fill">Doldur</button>
@@ -138,7 +138,7 @@
   Object.assign(host.style, { position: "fixed", bottom: "24px", right: "24px", zIndex: "2147483647" });
   document.body.appendChild(host);
   const shadow = host.attachShadow({ mode: "open" });
-  shadow.innerHTML = PANEL_HTML.replace('v2.1.8','v2.1.9');
+  shadow.innerHTML = PANEL_HTML;
   const $ = (id) => shadow.getElementById(id);
 
   let settings = { ...DEFAULT_SETTINGS };
@@ -158,7 +158,7 @@
     $("ekoa-set-saveWait").value = settings.saveWait;
     $("ekoa-fill-mode-select").value = settings.fillMode;
     updateGradeStatus(); renderGradeTable(); renderFillUI(); bindTabs(); bindEvents(); makeDraggable(); restorePanelPosition();
-    log("Panel v2.1.9 hazır", "success");
+    log("Panel v2.2.0 hazır", "success");
   }
 
   function log(msg, level = "info") {
@@ -251,7 +251,7 @@
     }
     units = newUnits.filter(u => u.groups.length > 0);
     renderUnitList();
-    if (units.length > 0) log(`${units.length} ünite saptandı.`, "success"); else log("Ünite bulunamadı.", "error");
+    if (units.length > 0) log(`${units.length} ünite saptandı.`, "success"); else log("Ünite bulunamadı. Önce 'Listele' ile öğrencileri yükleyin, ardından tekrar tarayın. Sorun devam ederse sayfayı yenileyip deneyin.", "error");
   }
 
   function renderUnitList() {
@@ -458,7 +458,7 @@
     // Pre-checks
     const mode = $("ekoa-fill-mode-select").value;
     if (mode === "grade" && grades.length === 0 && job === "fill") {
-      log("Not listesi boş. Lütfen 'Notları Getir' butonuna basın veya Manuel moda geçin.", "error");
+      log("Not listesi boş — başlamak için önce 'Notları Getir' butonuna basın. Notları çekemiyorsanız 'Manuel' moda geçerek de devam edebilirsiniz.", "error");
       return;
     }
 
@@ -474,7 +474,7 @@
 
         const buttons = [...document.querySelectorAll('[id^="btnOpen_"]')];
         if (buttons.length === 0) {
-          if (processed === 0) log("Öğrenci bulunamadı! Sayfada 'Listele' yapıp deneyin.", "error");
+          if (processed === 0) log("Gelişim raporu listesi boş. Sayfada önce sınıf seçip 'Listele' butonuna basın, öğrencilerin yüklendiğinden emin olun, sonra tekrar başlatın.", "error");
           break;
         }
         if (i >= buttons.length) break;
@@ -484,16 +484,17 @@
           const student = findGradeForRow(btn, i);
           const activeGroups = [];
           units.forEach(u => { if (u.selected) activeGroups.push(...u.groups); });
-          if (job === "fill" && activeGroups.length === 0) { log("Ünite seçilmedi. 'Üniteleri Tara' ile üniteleri saptayın ve seçim yapın.", "error"); break; }
+          if (job === "fill" && activeGroups.length === 0) { log("Hiçbir ünite seçili değil. Sol panelde 'Üniteleri Tara'ya basın, ünitelerin yüklendiğini görünce işaretleyip tekrar başlatın.", "error"); break; }
 
           if (grades.length > 0 && student && student.selected === false) {
-            log(`${i+1}. öğrenci atlandı (seçili değil).`);
+            log(`${i+1}. öğrenci atlandı: ${student.name || "(isim yok)"} — listede işareti kaldırılmış.`);
             processed++;
             continue;
           }
 
           if (job === "fill" && mode === "grade" && (!student || student.score === null || student.score === undefined)) {
-            log(`Öğrenci ${i+1} için not yok veya not listesinde eksik. 'Notları Getir' ile güncelleyin.`, "warn");
+            const sName = student?.name || `${i+1}. öğrenci`;
+            log(`${sName} için not bulunamadı — not listesinde eşleşme yok veya notu girilmemiş. 'Notları Getir'e tekrar basarak listeyi güncelleyin.`, "warn");
             processed++;
             continue;
           }
@@ -547,13 +548,13 @@
           await sleep(settings.loopGap);
 
         } catch (err) {
-          log(`Hata işlem sırasında: ${err.message}`, "error");
-          // continue to next student
+          const sName = (typeof student !== "undefined" && student?.name) ? student.name : `${i+1}. öğrenci`;
+          log(`${sName} işlenirken hata oluştu: ${err.message} — bu öğrenci atlandı, diğerleri devam ediyor.`, "error");
         }
       }
 
     } catch (e) {
-      log("Otomasyon hatası: " + e.message, "error");
+      log(`Otomasyon beklenmedik hata ile durdu: ${e.message} — sayfayı yenileyip tekrar deneyin.`, "error");
     } finally {
       isRunning = false; $("ekoa-btn-run").disabled = false; $("ekoa-btn-stop").disabled = true;
       log(stopRequested ? "Durduruldu." : "Bitti.", stopRequested ? "error" : "success");
@@ -573,7 +574,7 @@
           chrome.runtime.onMessage.removeListener(listener);
           btn.disabled = false; btn.innerText = "📥 Getir";
           if (msg.status === "done") { chrome.storage.local.get(STORAGE.grades, (res) => { grades = (res[STORAGE.grades] || []).map(g => ({ ...g, selected: true })); updateGradeStatus(); renderGradeTable(); log(`${grades.length} not yüklendi.`, "success"); }); }
-          else { status.innerText = "Hata!"; log("Hata: " + (msg.message || "Bilinmeyen"), "error"); }
+          else { status.innerText = "Hata!"; log("Notlar alınamadı — " + (msg.message || "Bilinmeyen hata. Sayfayı yenileyip tekrar deneyin."), "error"); }
         }
       };
       chrome.runtime.onMessage.addListener(listener);
