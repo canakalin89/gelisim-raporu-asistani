@@ -15,13 +15,7 @@ v2.1.8
 - **Hata Düzeltmesi — Yanlış Not Okuma:** "Notları Getir" özelliği dönem puanı yerine sınav tablosundaki ilk sütunun (Yazılı) değerini çekiyordu. E-Okul tablolarının iki satırlı başlık yapısı sütun indekslerini kaydırıyordu. Artık her satırda sağdan sola tarama yapılarak Puanı sütunu doğrudan ve güvenilir biçimde okunuyor.
 - **Yeni Özellik — Öğrenci Seçimi:** Not listesindeki her öğrencinin yanına onay kutusu eklendi. İşareti kaldırılan öğrenciler otomasyon sırasında atlanır. Devamsız veya muaf öğrenciler için zaman kaybetmeden çalışmaya devam edilir. Hepsini Seç / Hiçbirini Seçme butonları ve seçili öğrenci sayacı da eklendi.
 
-v1.0.0 (İLK HALİ)
-- Temel gelişim raporu doldurma fonksiyonu.
-- Manuel işaretleme seçenekleri (Rastgele, Sabit).
-- Basit tablo tarama mantığı.
-- Standart popup arayüzü.
-
-v2.1.7 (GÜNCEL HALİ)
+v2.1.7
 - **İkon Düzeltmesi:** Mağaza tarafından reddedilen bozuk PNG ikonları SVG kaynağından yeniden oluşturuldu (16px, 48px, 128px). Tasarım; uygulamanın temasıyla uyumlu mavi gradyan arka plan üzerinde radio butonlu form ve yeşil onay rozetinden oluşuyor.
 
 v2.1.6
@@ -30,3 +24,9 @@ v2.1.6
 - **Gelişmiş Temizleme:** E-Okul'un yeni "Yeşil Temizle" butonlarını (Bootstrap) satır bazlı hedefleyerek sayfadan atma riskini ortadan kaldıran güvenli temizleme sistemi.
 - **Modern UI/UX:** Tamamen yenilenmiş dikey kart tasarımı, canlı işlem durumu geri bildirimleri (⌛ Alınıyor...), profesyonel ikon ve gelişmiş Log takibi.
 - **Performans & Stabilite:** Özelleştirilebilir hız ayarları, akıllı tablo saptama ve mağaza standartlarına uygun optimize edilmiş kod yapısı.
+
+v1.0.0 (İLK HALİ)
+- Temel gelişim raporu doldurma fonksiyonu.
+- Manuel işaretleme seçenekleri (Rastgele, Sabit).
+- Basit tablo tarama mantığı.
+- Standart popup arayüzü.

@@ -31,9 +31,9 @@ Desteklenen sayfalar:
 |---|---|
 | 📊 **Not Tabanlı Mod** | E-Okul'dan öğrenci dönem puanlarını otomatik çeker; nota göre seviye atar |
 | ✏️ **Manuel Mod** | Rastgele, sabit değer veya aralık yöntemiyle formu doldurur |
-| ☑️ **Öğrenci Seçimi** | Devamsız veya muaf öğrencileri listeden çıkararak sadece seçili öğrenciler için doldurur |
+| ☑️ **Öğrenci Seçimi** | Devamsız veya muaf öğrenciler, işareti kaldırılarak otomasyon dışında bırakılır |
 | 📂 **Ünite Seçimi** | Hangi ünitelerin doldurulacağını tek tek seçebilirsiniz |
-| 🧹 **Toplu Temizleme** | Tüm rapor cevaplarını tek tıkla siler (çift onay mekanizmalı) |
+| 🧹 **Toplu Temizleme** | Seçili ünitelerdeki rapor cevaplarını tek tıkla siler |
 | 🔒 **Gizlilik** | Hiçbir sunucuya veri göndermez; her şey tarayıcıda yerel olarak çalışır |
 | ⚡ **Hız Ayarları** | Açılış, işlem ve kayıt gecikmelerini özelleştirebilirsiniz |
 | 🔁 **Önbellek** | Çekilen notlar yerel depoya kaydedilir; tekrar tekrar çekme gerekmez |
@@ -92,27 +92,19 @@ Notlar getirildikten sonra listede her öğrencinin yanında bir onay kutusu gö
 
 1. **"Manuel"** modunu seçin.
 2. Yöntemi belirleyin:
-   - 🎲 **Rastgele** — belirtilen aralıkta rastgele seviye atar
+   - 🎲 **Rastgele** — mevcut seçenekler arasından rastgele seviye atar
    - 📌 **Sabit Değer** — tüm öğrencilere aynı seviyeyi girer
-   - 📏 **Aralık** — minimum ve maksimum arasında dağıtır
+   - 📏 **Aralık** — minimum ve maksimum arasında rastgele seviye atar
 3. **"Başlat"** butonuna basın.
 
 ---
 
 ### 🧹 Hepsini Temizle
 
-1. **"Temizle"** butonuna bir kez basın — onay uyarısı görünür.
-2. **3 saniye içinde** tekrar basın — tüm cevaplar silinir.
+1. Temizlenecek ünitelerin seçili olduğundan emin olun.
+2. Sol alttaki **TEMİZLE** butonuna basın.
 
----
-
-### ⚙️ Önce Temizle Seçeneği
-
-| Seçenek | Davranış |
-|---|---|
-| **Butonlar** | "Temizle" butonlarına tıklar |
-| **Seçimi Kaldır** | Radio butonları uncheck eder |
-| **Temizleme Yok** | Mevcut duruma dokunmaz |
+Seçili ünitelerdeki cevaplar silinir ve kaydedilir. Not listesinde işareti kaldırılmış öğrenciler atlanır.
 
 ---
 
